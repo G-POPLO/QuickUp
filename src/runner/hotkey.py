@@ -5,7 +5,6 @@
 import atexit
 
 import config
-from cppextend.QUmodule import start_hotkey, stop_hotkey
 
 reg = None
 _callback = None
@@ -22,6 +21,8 @@ def start_listen(command=None):
         return
     if _is_running:
         return
+    # 延迟导入：只在真正需要注册热键时加载 C++ 模块
+    from cppextend.hotkeymodule import start_hotkey
     fsModifiers = config.settings['advanced']['callUp'][0]
     vk = config.settings['advanced']['callUp'][1]
     start_hotkey(fsModifiers, vk, _callback)
@@ -34,5 +35,6 @@ def pause_listen():
     global _is_running
     if not _is_running:
         return
+    from cppextend.hotkeymodule import stop_hotkey
     stop_hotkey()
     _is_running = False

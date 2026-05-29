@@ -14,25 +14,24 @@ Quickup C++ module
 #include "regrun.h"
 #include "shortcut.h"
 #include "ui.h"
-#include "hotkey.h"
 #include "zone.h"
 
 #include <dwmapi.h>
 
 
 static PyObject* get_parent(PyObject* self, PyObject* args) {
-    long hwnd;
-    int flag = PyArg_ParseTuple(args, "i:get_parent", &hwnd);
+    Py_ssize_t hwnd;
+    int flag = PyArg_ParseTuple(args, "n:get_parent", &hwnd);
     if (!flag) {
         return NULL;
     }
     HWND parent = GetParent((HWND)hwnd);
-    return Py_BuildValue("i", parent);
+    return PyLong_FromVoidPtr(parent);
 }
 
 static PyObject* get_windowtext(PyObject* self, PyObject* args) {
-    long hwnd;
-    int flag = PyArg_ParseTuple(args, "i:get_windowtext", &hwnd);
+    Py_ssize_t hwnd;
+    int flag = PyArg_ParseTuple(args, "n:get_windowtext", &hwnd);
     if (!flag) {
         return NULL;
     }
@@ -56,7 +55,7 @@ static PyObject* priority_window(PyObject* self, PyObject* args) {
     HWND hwnd;
     // 判断是str还是int
     if (PyLong_Check(name)) { // int
-        hwnd = (HWND)PyLong_AsLong(name);
+        hwnd = (HWND)PyLong_AsVoidPtr(name);
     } else { // str
         wchar_t* wname = PyUnicode_AsWideCharString(name, NULL);
         hwnd = FindWindowW(nullptr, wname);
@@ -87,15 +86,15 @@ static PyObject* is_msix(PyObject* self, PyObject* args) {
 }
 
 static PyObject* window_no_icon(PyObject* self, PyObject* args) {
-    long hwnd;
-    int flag = PyArg_ParseTuple(args, "i:window_no_icon", &hwnd);
+    Py_ssize_t hwnd;
+    int flag = PyArg_ParseTuple(args, "n:window_no_icon", &hwnd);
     if (!flag) {
         return NULL;
     }
     HWND root = GetParent((HWND)hwnd);
-    LONG windowlong = GetWindowLongW(root, GWL_STYLE);
+    LONG_PTR windowlong = GetWindowLongPtrW(root, GWL_STYLE);
     windowlong &= ~WS_SYSMENU;
-    SetWindowLongW(root, GWL_STYLE, windowlong);
+    SetWindowLongPtrW(root, GWL_STYLE, windowlong);
     return Py_None;
 }
 
@@ -103,8 +102,8 @@ static PyObject* window_no_icon(PyObject* self, PyObject* args) {
 #define DWMWA_USE_IMMERSIVE_DARK_MODE 20
 #endif
 static PyObject* set_window_dark(PyObject* self, PyObject* args) {
-    long hwnd;
-    int flag = PyArg_ParseTuple(args, "i:set_window_dark", &hwnd);
+    Py_ssize_t hwnd;
+    int flag = PyArg_ParseTuple(args, "n:set_window_dark", &hwnd);
     if (!flag) {
         return NULL;
     }
@@ -375,11 +374,11 @@ static PyObject* create_link(PyObject* self, PyObject* args) {
 }
 
 static PyObject* init_tray(PyObject* self, PyObject* args) {
-    long pyhwnd;
+    Py_ssize_t pyhwnd;
     PyObject* pytooltip;
     PyObject* about_callback;
     PyObject* exit_callback;
-    int flag = PyArg_ParseTuple(args, "iOOO:init_tray", &pyhwnd, &pytooltip, &about_callback, &exit_callback);
+    int flag = PyArg_ParseTuple(args, "nOOO:init_tray", &pyhwnd, &pytooltip, &about_callback, &exit_callback);
     if (!flag) {
         return NULL;
     }
@@ -397,9 +396,9 @@ static PyObject* remove_tray(PyObject* self, PyObject* args) {
 }
 
 static PyObject* enable_entry_drop(PyObject* self, PyObject* args) {
-    long long pyhwnd;
+    Py_ssize_t pyhwnd;
     PyObject* pycallback;
-    int flag = PyArg_ParseTuple(args, "LO:enable_entry_drop", &pyhwnd, &pycallback);
+    int flag = PyArg_ParseTuple(args, "nO:enable_entry_drop", &pyhwnd, &pycallback);
     if (!flag) {
         return NULL;
     }
@@ -430,23 +429,6 @@ static PyObject* is_valid_windows_filename(PyObject* self, PyObject* args) {
     wchar_t* filename = PyUnicode_AsWideCharString(pyfilename, NULL);
     bool result = valid_windows_filename(filename);
     return PyBool_FromLong(result);
-}
-
-static PyObject* start_hotkey(PyObject* self, PyObject* args) {
-    int fsmodifier;
-    int fskey;
-    PyObject* pycallback;
-    int flag = PyArg_ParseTuple(args, "iiO:create_hotkey", &fsmodifier, &fskey, &pycallback);
-    if (!flag) {
-        return NULL;
-    }
-    start_hotkey_listener(fsmodifier, fskey, pycallback);
-    return Py_None;
-}
-
-static PyObject* stop_hotkey(PyObject* self, PyObject* args) {
-    stop_hotkey_listener();
-    return Py_None;
 }
 
 static PyObject* detect_app_theme(PyObject* self, PyObject* args) {
@@ -507,8 +489,6 @@ static PyMethodDef QUModuleMethods[] = {
     {"enable_entry_drop", (PyCFunction)enable_entry_drop, METH_VARARGS, PyDoc_STR("enable_entry_drop(hwnd:int, callback:function) -> DropTarget")},
     {"disable_entry_drop", (PyCFunction)disable_entry_drop, METH_VARARGS, PyDoc_STR("disable_entry_drop(dt:DropTarget) -> None")},
     {"is_valid_windows_filename", (PyCFunction)is_valid_windows_filename, METH_VARARGS, PyDoc_STR("is_valid_windows_filename(filename:str) -> bool")},
-    {"start_hotkey", (PyCFunction)start_hotkey, METH_VARARGS, PyDoc_STR("start_hotkey(fsmodifier:int, fskey:int, callback:function) -> None")},
-    {"stop_hotkey", (PyCFunction)stop_hotkey, METH_VARARGS, PyDoc_STR("stop_hotkey() -> None")},
     {"detect_app_theme", (PyCFunction)detect_app_theme, METH_VARARGS, PyDoc_STR("detect_app_theme() -> str")},
     {"worker_size", (PyCFunction)worker_size, METH_VARARGS, PyDoc_STR("worker_size() -> tuple")},
     {"start_window_hook", (PyCFunction)start_window_hook, METH_VARARGS, PyDoc_STR("start_window_hook() -> None")},

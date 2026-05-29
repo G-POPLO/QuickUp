@@ -5,6 +5,7 @@ tasks/
 draft.png
 .lock
 tasks/
+trae/
 src/cppextend/cppmodule.o
 src/cppextend/QUmodule.pyd
 src/cppextend/QUmodule.exp
