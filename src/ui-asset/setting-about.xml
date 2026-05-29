@@ -1,0 +1,36 @@
+<tinui>
+<line pady="15">
+    <line>
+        <image width="80" height="80" state="uniform" imgfile="./logo-small.png"></image>
+    </line>
+    <line x="10" pady="5">
+        <title text="关于 QuickUp"></title>
+    </line>
+    <line x="10" pady="5">
+        <paragraph text="版本：%VERSION%"></paragraph>
+       
+    </line>
+    <line x="10" pady="5">
+    
+        <checkbutton text="自动检查更新" command="self.funcs['auto_check_update']">updatecheck</checkbutton>
+       
+    </line>
+    <line x="10" pady="5">
+        <paragraph text="作者：Smart-Space"></paragraph>
+    </line>
+    <line x="10" pady="5">
+        <paragraph text="发布页面："></paragraph>
+        <link text="GitHub" url="https://github.com/Smart-Space/QuickUp/releases/"></link>
+        <link text="Gitee" url="https://gitee.com/captorking/QuickUp/releases/"></link>
+    </line>
+    <line x="10" pady="10">
+        <button text="检查更新" command="self.funcs['check_update']"></button>
+        <button text="访问 QuickUp 网站" command='self.funcs["open_url"]'></button>
+        <button text="查看说明文档" command='self.funcs["open_doc"]'></button>
+    </line>
+</line>
+
+<line x="5">
+    <paragraph width="490" text="Copyright © 2024-Present QuickUp"></paragraph>
+</line>
+</tinui>

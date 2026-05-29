@@ -1,5 +1,5 @@
 <tinui>
 <line>
-    <pivot content="((' 常规 ','general'),(' 高级 ','advanced'),(' 存储 ','storage'),('快捷键','shortcut'))" command="self.funcs['open_page']">pivot</pivot>
+    <pivot content="((' 常规 ','general'),(' 高级 ','advanced'),(' 存储 ','storage'),('快捷键','shortcut'),(' 关于 ','about'))" command="self.funcs['open_page']">pivot</pivot>
 </line>
 </tinui>

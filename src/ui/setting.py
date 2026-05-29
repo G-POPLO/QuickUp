@@ -26,13 +26,17 @@ settingwindow = False
 root = None
 theme = None
 lastUI = None
+gUI = None
+aUI = None
+sUI = None
+scUI = None
+abUI = None
 
 # ==========常规设置==========
 first_check_topmost = True
-first_check_update = True
 first_check_showhidden = True
 def init_general():
-    global gUI, first_check_topmost, first_check_update, first_check_showhidden
+    global gUI, first_check_topmost, first_check_showhidden
     gUI = BasicTinUI(root, background="#f3f3f3")
     gUI.place(x=0, y=60, width=600, height=540)
     gUIxml = TinUIXml(theme(gUI))
@@ -77,20 +81,11 @@ def init_general():
     else:
         first_check_showhidden = False
 
-    updatecheck = gUIxml.tags["updatecheck"][-2]
-    if config.settings['general']['checkUpdate']:
-        updatecheck.on()
-    else:
-        first_check_update = False
-    
     exitradio = gUIxml.tags["exitradio"][-2]
     if config.settings['general'].get('closeToTray', True):
         exitradio.select(1)
     else:
         exitradio.select(0)
-
-    root.bind("<<UpdateReady>>", __update_ready)
-    root.bind("<<UpdateFailed>>", __update_failed)
 
 def set_topmost(flag):
     # 设置窗口置顶
@@ -426,6 +421,33 @@ def about_top_task(e):
     webopen('https://quickup.smart-space.com.cn/priority-of-task/')
 
 
+# ==========关于设置==========
+first_check_update = True
+def init_about():
+    global abUI, first_check_update
+    abUI = BasicTinUI(root, background="#f3f3f3")
+    abUIxml = TinUIXml(theme(abUI))
+    abUIxml.funcs.update({'check_update': check_update, 'auto_check_update': s_auto_check_update,
+                          'open_url': open_url, 'open_doc': open_doc})
+    with open("./ui-asset/setting-about.xml", "r", encoding="utf-8") as f:
+        abUIxml.loadxml(f.read().replace('%VERSION%', datas.version))
+    
+    updatecheck = abUIxml.tags["updatecheck"][-2]
+    if config.settings['general']['checkUpdate']:
+        updatecheck.on()
+    else:
+        first_check_update = False
+    
+    root.bind("<<UpdateReady>>", __update_ready)
+    root.bind("<<UpdateFailed>>", __update_failed)
+
+def open_url(e):
+    webopen('https://quickup.smart-space.com.cn/')
+
+def open_doc(e):
+    webopen('https://quickup.smart-space.com.cn/document/')
+
+
 # 快捷键（暂不提供设置working...）
 tdata1 = (
     ('快捷键','说明'),
@@ -446,6 +468,7 @@ tdata2 = (
     ('Alt+2','高级设置'),
     ('Alt+3','存储设置'),
     ('Alt+4','快捷键设置'),
+    ('Alt+5','关于'),
     ('Ctrl+U','检查更新'),
     ('Ctrl+W','关闭窗口'),
 )
@@ -484,22 +507,23 @@ def init_shortcut():
 # 页面切换
 def open_page(flag):
     global lastUI
-    if flag == 'general':
+    if lastUI is not None:
         lastUI.place_forget()
+    if flag == 'general':
         gUI.place(x=0, y=60, width=600, height=540)
         lastUI = gUI
     elif flag == 'advanced':
-        lastUI.place_forget()
         aUI.place(x=0, y=60, width=600, height=540)
         lastUI = aUI
     elif flag =='storage':
-        lastUI.place_forget()
         sUI.place(x=0, y=60, width=600, height=540)
         lastUI = sUI
     elif flag =='shortcut':
-        lastUI.place_forget()
         scUI.place(x=0, y=60, width=600, height=540)
         lastUI = scUI
+    elif flag =='about':
+        abUI.place(x=0, y=60, width=600, height=540)
+        lastUI = abUI
 
 def select_page(flag):
     if flag == 'general':
@@ -514,6 +538,9 @@ def select_page(flag):
     elif flag =='shortcut':
         pivot.select(3)
         open_page('shortcut')
+    elif flag =='about':
+        pivot.select(4)
+        open_page('about')
 
 
 def close_setting():
@@ -557,6 +584,7 @@ def show_setting(e):
     init_advanced()
     init_storage()
     init_shortcut()
+    init_about()
     lastUI = gUI
     open_page('general')
 
@@ -564,5 +592,6 @@ def show_setting(e):
     root.bind("<Alt-KeyPress-2>", lambda e: select_page('advanced'))
     root.bind("<Alt-KeyPress-3>", lambda e: select_page('storage'))
     root.bind("<Alt-KeyPress-4>", lambda e: select_page('shortcut'))
+    root.bind("<Alt-KeyPress-5>", lambda e: select_page('about'))
     root.bind("<Control-u>", check_update)
     root.bind("<Control-w>", lambda e: close_setting())

@@ -37,14 +37,5 @@
             <radiobox content="('退出应用','缩小到托盘')" command="self.funcs['sel_exit_mode']">exitradio</radiobox>
         </line>
     </line>
-    <line pady="15">
-        <line anchor="w" lineanchor="nw">
-            <paragraph text='当前版本：%VERSION%'></paragraph>
-            <button text="查看更新" command="self.funcs['check_update']"></button>
-        </line>
-        <line>
-            <checkbutton text="自动检查更新" command="self.funcs['auto_check_update']">updatecheck</checkbutton>
-        </line>
-    </line>
 </line>
 </tinui>
