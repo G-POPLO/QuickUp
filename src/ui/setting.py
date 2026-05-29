@@ -421,6 +421,9 @@ def about_top_task(e):
     webopen('https://quickup.smart-space.com.cn/priority-of-task/')
 
 
+# ==========快捷键设置==========
+first_check_hotkey = True
+
 # ==========关于设置==========
 first_check_update = True
 def init_about():
@@ -495,13 +498,32 @@ tdata4 = (
     ('Esc','取消选择'),
 )
 
+def toggle_hotkey(flag):
+    global first_check_hotkey
+    if first_check_hotkey:
+        first_check_hotkey = False
+        return
+    config.settings['advanced']['enableHotkey'] = flag
+    config.save_config()
+    import runner.hotkey as hotkey
+    if flag:
+        hotkey.start_listen()
+    else:
+        hotkey.pause_listen()
+
 def init_shortcut():
-    global scUI, scUIxml
+    global scUI, scUIxml, first_check_hotkey
     scUI = BasicTinUI(root, background="#f3f3f3")
     scUIxml = TinUIXml(theme(scUI))
     scUIxml.datas.update({'tdata1': tdata1, 'tdata2': tdata2, 'tdata3': tdata3, 'tdata4': tdata4})
+    scUIxml.funcs.update({'toggle_hotkey': toggle_hotkey})
     with open("./ui-asset/setting-shortcut.xml", "r", encoding="utf-8") as f:
         scUIxml.loadxml(f.read())
+    hotkeyonoff = scUIxml.tags["hotkeyonoff"][-2]
+    if config.settings['advanced'].get('enableHotkey', True):
+        hotkeyonoff.on()
+    else:
+        first_check_hotkey = False
 
 
 # 页面切换

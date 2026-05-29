@@ -1,5 +1,9 @@
 <tinui>
 <line>
+    <line pady="15" anchor="w" lineanchor="nw">
+        <paragraph text='启用全局热键'></paragraph>
+        <onoff bd='28' command='self.funcs["toggle_hotkey"]'>hotkeyonoff</onoff>
+    </line>
     <line>
         <line>
             <title text="主界面"></title>
