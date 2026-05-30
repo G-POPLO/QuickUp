@@ -498,6 +498,10 @@ tdata4 = (
     ('Esc','取消选择'),
 )
 
+tdata5 = (
+    ('快捷键','说明'),
+)
+
 def toggle_hotkey(flag):
     global first_check_hotkey
     if first_check_hotkey:
@@ -610,10 +614,10 @@ def show_setting(e):
     lastUI = gUI
     open_page('general')
 
-    root.bind("<Alt-KeyPress-1>", lambda e: select_page('general'))
-    root.bind("<Alt-KeyPress-2>", lambda e: select_page('advanced'))
-    root.bind("<Alt-KeyPress-3>", lambda e: select_page('storage'))
-    root.bind("<Alt-KeyPress-4>", lambda e: select_page('shortcut'))
-    root.bind("<Alt-KeyPress-5>", lambda e: select_page('about'))
-    root.bind("<Control-u>", check_update)
-    root.bind("<Control-w>", lambda e: close_setting())
+    # root.bind("<Alt-KeyPress-1>", lambda e: select_page('general'))
+    # root.bind("<Alt-KeyPress-2>", lambda e: select_page('advanced'))
+    # root.bind("<Alt-KeyPress-3>", lambda e: select_page('storage'))
+    # root.bind("<Alt-KeyPress-4>", lambda e: select_page('shortcut'))
+    # root.bind("<Alt-KeyPress-5>", lambda e: select_page('about'))
+    # root.bind("<Control-u>", check_update)
+    # root.bind("<Control-w>", lambda e: close_setting())

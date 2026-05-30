@@ -3,8 +3,10 @@
     <line pady="15" anchor="w" lineanchor="nw">
         <paragraph text='启用全局热键'></paragraph>
         <onoff bd='28' command='self.funcs["toggle_hotkey"]'>hotkeyonoff</onoff>
-    </line>
-    <line>
+     </line>
+
+
+    <!-- <line>
         <line>
             <title text="主界面"></title>
         </line>
@@ -19,9 +21,9 @@
         <line>
             <table data="self.datas['tdata2']"></table>
         </line>
-    </line>
+    </line> --> 
     <back></back>
-    <line>
+    <!-- <line>
         <line>
             <title text="编辑界面"></title>
         </line>
@@ -36,6 +38,6 @@
         <line>
             <table data="self.datas['tdata4']"></table>
         </line>
-    </line>
+    </line> -->
 </line>
 </tinui>

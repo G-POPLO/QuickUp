@@ -11,6 +11,7 @@
         <checkbutton text='开机启动' command='self.funcs["start_on_boot"]'>check</checkbutton>
         <button text='关于QuickUp的开机启动' command='self.funcs["about_start_on_boot"]'></button>
     </line>
+    
     <line pady="15" anchor='w' lineanchor='nw'>
         <paragraph text='快速唤醒QuickUp热键: '></paragraph>
         <togglebutton text='Ctrl' command='self.funcs["toggle_hk_ctrl"]'>b1</togglebutton>

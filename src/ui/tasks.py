@@ -65,26 +65,27 @@ def refresh_tasks_view():
     global tasknames
     __clear_all_tasks_ui()
     datas.__load_tasks_name()
-    now_tasks = sorted(datas.tasks_name)
+    now_tasks = datas.tasks_name.copy()
     tasknames = sort_with_priority(now_tasks)
     for task in tasknames:
         add_task_view(task)
 
 def sort_with_priority(tasks:list):
-    # 按优先级排序
+    # 按优先级和序号排序
     res_list = []
-    res_tasks = []
+    normal_tasks = []
     for task in tasks:
         task_json = os.path.join(datas.workspace, task + '.json')
         if not os.path.exists(task_json):
-            # 若被删除，保证程序能够正常运行，但是任务的删除仍应当通过QuickUp进行
-            tasks.remove(task)
             continue
         with open(task_json, 'r', encoding='utf-8') as f:
             data = json.load(f)
         if data.get('rate', False):
             res_list.append(task)
+        else:
+            normal_tasks.append((data.get('index', 0), task))
     priority_txt = os.path.join(datas.workspace, 'priority.txt')
+    res_tasks = []
     if os.path.exists(priority_txt):
         with open(priority_txt, 'r', encoding='utf-8') as f:
             res_cmp_list = f.read().strip().split('\n')
@@ -92,10 +93,11 @@ def sort_with_priority(tasks:list):
             if task in res_list:
                 res_tasks.append(task)
     else:
-        res_tasks = res_list
-    for task in res_tasks:
-        tasks.remove(task)
-    res_tasks += tasks
+        res_tasks = res_list.copy()
+    normal_tasks.sort(key=lambda x: x[0])
+    res_tasks += [t[1] for t in normal_tasks]
+    classified = set(res_tasks)
+    res_tasks += [task for task in tasks if task not in classified]
     return res_tasks
 
 def create_task(e):

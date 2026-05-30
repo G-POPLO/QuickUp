@@ -527,10 +527,12 @@ class Editor(tk.Toplevel):
     def __init__(self, task:str='', callback=None, flag="EDIT", name_changeable=True):
         super().__init__()
         self.task = task
-        self.data = {"name": task, "cwd": "", "tasks": [], "rate": False}
+        self.data = {"name": task, "cwd": "", "tasks": [], "rate": False, "index": 0}
         self.tasks = []# 任务列表，模拟listview增删
         self.saved = True# 是否已保存
         self.hidden = False# 是否隐藏
+        self.original_rate = False
+        self.original_index = 0
 
         width = 500
         height = 600
@@ -565,6 +567,10 @@ class Editor(tk.Toplevel):
         self.entry = self.uixml.tags['entry'][0]
         self.entryfunc = self.uixml.tags['entry'][1]
         self.entry.config(disabledbackground=self.entry.cget('background'), disabledforeground=self.entry.cget('foreground'))
+        self.indexEntry = self.uixml.tags['indexEntry'][0]
+        self.indexEntry.config(justify='center')
+        vcmd = (self.register(self.__validate_index), '%P')
+        self.indexEntry.config(validate='key', validatecommand=vcmd)
         self.view = self.uixml.tags['view'][-2]
         _, ratingbarBack, self.ratingbar, _ = self.uixml.tags['ratingbar']
         self.ui.itemconfig(ratingbarBack, outline='#f3f3f3' if themename == 'light' else '#202020')
@@ -604,17 +610,17 @@ class Editor(tk.Toplevel):
         if self.task != '':
             task_editors[self.task] = self
         
-        self.bind("<Control-w>", lambda e: self.close())
-        self.bind("<Control-s>", self.save_task)
-        self.bind("<Control-r>", self.run_task)
-        self.bind("<Control-e>", self.set_cwd)
-        self.bind("<Alt-a>", self.toggle_priority)
-        self.bind("<Alt-f>", self.open_local)
-        self.bind("<Alt-c>", self.add_task_cmd)
-        self.bind("<Alt-s>", self.add_task_cmds)
-        self.bind("<Alt-t>", self.add_task_task)
-        self.bind("<Alt-w>", self.add_workspace)
-        self.bind("<Alt-i>", self.add_task_tip)
+        # self.bind("<Control-w>", lambda e: self.close())
+        # self.bind("<Control-s>", self.save_task)
+        # self.bind("<Control-r>", self.run_task)
+        # self.bind("<Control-e>", self.set_cwd)
+        # self.bind("<Alt-a>", self.toggle_priority)
+        # self.bind("<Alt-f>", self.open_local)
+        # self.bind("<Alt-c>", self.add_task_cmd)
+        # self.bind("<Alt-s>", self.add_task_cmds)
+        # self.bind("<Alt-t>", self.add_task_task)
+        # self.bind("<Alt-w>", self.add_workspace)
+        # self.bind("<Alt-i>", self.add_task_tip)
     
     def renew_title(self):
         # 更新标题
@@ -630,12 +636,16 @@ class Editor(tk.Toplevel):
         # 加载任务
         if self.task == '':
             self.original_rate = False
+            self.original_index = 0
             return
         with open(datas.workspace + self.task + '.json', 'r', encoding='utf-8') as f:
             json_data = json.load(f)
             self.data['cwd'] = json_data.get('cwd', '')
             self.data['tasks'] = json_data['tasks']
             self.original_rate = self.data['rate'] = json_data.get('rate', False)
+            self.original_index = self.data['index'] = json_data.get('index', 0)
+            self.indexEntry.delete(0, 'end')
+            self.indexEntry.insert(0, str(self.data['index']))
             if self.data['rate']:
                 self.ratingbar.setrate(1)
         for one in self.data['tasks']:
@@ -713,6 +723,12 @@ class Editor(tk.Toplevel):
         self.data['tasks'] = []
         for one in self.tasks:
             self.data['tasks'].append(one.get())
+        try:
+            self.data['index'] = int(self.indexEntry.get())
+        except ValueError:
+            self.data['index'] = 0
+        _index_changed = self.data['index'] != getattr(self, 'original_index', 0)
+        _rate_changed = self.data['rate'] != self.original_rate
         with open(filename, 'w', encoding='utf-8') as f:
             json.dump(self.data, f, indent=4)
         # 置顶优先级
@@ -745,6 +761,12 @@ class Editor(tk.Toplevel):
             if self.hidden:
                 self.hidden = False
                 self.hidebutton.off()
+        
+        if _rate_changed or _index_changed:
+            from ui.tasks import refresh_tasks_view
+            refresh_tasks_view()
+            self.original_index = self.data['index']
+            self.original_rate = self.data['rate']
         
         self.saved = True
         self.renew_title()
@@ -799,6 +821,15 @@ class Editor(tk.Toplevel):
                 self.entry.insert(0, name[:-3])
         self.hidden = tag
         self.contentChanged(None)
+
+    def __validate_index(self, value):
+        if value == '':
+            return True
+        try:
+            int(value)
+            return True
+        except ValueError:
+            return False
 
     def set_priority(self, num):
         # 设置优先级
@@ -961,6 +992,8 @@ class Editor(tk.Toplevel):
             del task_editors[self.task]
             if self.flag == "NEW" and self.callback:
                 self.callback(self.task, True)
+                from ui.tasks import refresh_tasks_view
+                refresh_tasks_view()
         self.uixml.clean()
         self.data.clear()
         self.tasks.clear()
