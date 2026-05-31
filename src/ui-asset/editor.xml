@@ -2,8 +2,7 @@
 <!-- QuickUp Editor -->
 <line x="0">
     <line>
-        <entry width="250">entry</entry>
-        <entry width="40">indexEntry</entry>
+        <entry width="302">entry</entry>
         <togglebutton text="&#xE7B3;" font="{Segoe Fluent Icons} 16" command="self.funcs['if_hide_task']">hidebutton</togglebutton>
         <toolbutton icon="&#xE74E;" text="" font="{Segoe Fluent Icons} 16" command="self.funcs['save_task']"></toolbutton>
         <toolbutton icon="&#xE724;" text="" font="{Segoe Fluent Icons} 16" command="self.funcs['run_task']"></toolbutton>
@@ -16,7 +15,6 @@
         <button2 text="工作区组" command="self.funcs['add_workspace']"></button2>
         <button2 text="备注" command="self.funcs['add_tip']"></button2>
         <line x='495' padx='5' lineanchor='e'>
-            <ratingbar num='1' size='16' command="self.funcs['set_priority']">ratingbar</ratingbar>
             <toolbutton icon="&#xE8DA;" text="" font="{Segoe Fluent Icons} 16" command="self.funcs['open_local']"></toolbutton>
             <toolbutton icon="&#xEE49;" text="" font="{Segoe Fluent Icons} 16" command="self.funcs['create_task_lnk']"></toolbutton>
         </line>

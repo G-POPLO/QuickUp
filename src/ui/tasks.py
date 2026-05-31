@@ -65,39 +65,37 @@ def refresh_tasks_view():
     global tasknames
     __clear_all_tasks_ui()
     datas.__load_tasks_name()
-    now_tasks = datas.tasks_name.copy()
+    now_tasks = sorted(datas.tasks_name)
     tasknames = sort_with_priority(now_tasks)
     for task in tasknames:
         add_task_view(task)
 
 def sort_with_priority(tasks:list):
-    # 按优先级和序号排序
-    res_list = []
-    normal_tasks = []
-    for task in tasks:
-        task_json = os.path.join(datas.workspace, task + '.json')
-        if not os.path.exists(task_json):
-            continue
-        with open(task_json, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-        if data.get('rate', False):
-            res_list.append(task)
-        else:
-            normal_tasks.append((data.get('index', 0), task))
-    priority_txt = os.path.join(datas.workspace, 'priority.txt')
+    # 按list.json顺序排序
+    list_json_path = os.path.join(datas.workspace, 'list.json')
+    if not os.path.exists(list_json_path):
+        tasks_with_time = []
+        for task in tasks:
+            task_json = os.path.join(datas.workspace, task + '.json')
+            if os.path.exists(task_json):
+                ctime = os.path.getctime(task_json)
+                tasks_with_time.append((task, ctime))
+        tasks_with_time.sort(key=lambda x: x[1])
+        sorted_tasks = [t[0] for t in tasks_with_time]
+        data = {"tasks": [t + '.json' for t in sorted_tasks]}
+        with open(list_json_path, 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=4)
+        return sorted_tasks
+    with open(list_json_path, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+    order = data.get('tasks', [])
+    order_names = [t[:-5] if t.endswith('.json') else t for t in order]
     res_tasks = []
-    if os.path.exists(priority_txt):
-        with open(priority_txt, 'r', encoding='utf-8') as f:
-            res_cmp_list = f.read().strip().split('\n')
-        for task in res_cmp_list:
-            if task in res_list:
-                res_tasks.append(task)
-    else:
-        res_tasks = res_list.copy()
-    normal_tasks.sort(key=lambda x: x[0])
-    res_tasks += [t[1] for t in normal_tasks]
-    classified = set(res_tasks)
-    res_tasks += [task for task in tasks if task not in classified]
+    for task in order_names:
+        if task in tasks:
+            res_tasks.append(task)
+            tasks.remove(task)
+    res_tasks += sorted(tasks)
     return res_tasks
 
 def create_task(e):
@@ -141,19 +139,17 @@ def delete_task_view(task:str):
     if res:
         if task in datas.tasks_name:
             # 后端删除任务
-            if os.path.exists(datas.workspace + 'priority.txt'):
-                # 删除置顶
-                with open(datas.workspace + 'priority.txt', 'a+', encoding='utf-8') as f:
-                    f.seek(0)
-                    lines = f.readlines()
-                    lines = [line.rstrip() for line in lines]
-                    if task in lines:
-                        lines.remove(task)
-                    f.seek(0)
-                    f.truncate()
-                    f.write('\n'.join(lines))
-                    if len(lines) != 0:
-                        f.write('\n')
+            list_json_path = datas.workspace + 'list.json'
+            if os.path.exists(list_json_path):
+                with open(list_json_path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                tasks_list = data.get('tasks', [])
+                task_json = task + '.json'
+                if task_json in tasks_list:
+                    tasks_list.remove(task_json)
+                    data['tasks'] = tasks_list
+                    with open(list_json_path, 'w', encoding='utf-8') as f:
+                        json.dump(data, f, indent=4)
             index = tasknames.index(task)
             tasknames.remove(task)
             del taskuixml[index]
@@ -211,6 +207,19 @@ def edit_task(task:str):
 
 def change_task_name(task:str, newname:str):
     # 修改已经存在的任务的名称
+    list_json_path = datas.workspace + 'list.json'
+    if os.path.exists(list_json_path):
+        with open(list_json_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        tasks_list = data.get('tasks', [])
+        old_json = task + '.json'
+        new_json = newname + '.json'
+        if old_json in tasks_list:
+            idx = tasks_list.index(old_json)
+            tasks_list[idx] = new_json
+            data['tasks'] = tasks_list
+            with open(list_json_path, 'w', encoding='utf-8') as f:
+                json.dump(data, f, indent=4)
     if task in datas.tasks_name:
         index1 = datas.tasks_name.index(task)
         datas.tasks_name[index1] = newname
