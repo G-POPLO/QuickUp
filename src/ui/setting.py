@@ -355,7 +355,7 @@ def init_storage():
     sthemeUI = theme(sUI)
     sUIxml = TinUIXml(sthemeUI)
     sUIxml.funcs.update({'refresh_storage': refresh_storage, 'open_selected': open_selected,
-                         'edit_selected': edit_selected, 'about_top_task': about_top_task})
+                         'edit_selected': edit_selected})
     with open("./ui-asset/setting-storage.xml", "r", encoding="utf-8") as f:
         sUIxml.loadxml(f.read())
     refresh_storage(None)
@@ -415,10 +415,6 @@ def edit_selected(e):
     if nowselected is not None:
         if os.path.isfile(nowselected):
             subprocess.Popen(f'start "" "{nowselected}"', shell=True)
-
-def about_top_task(e):
-    # 打开关于priority.txt的链接页面
-    webopen('https://quickup.smart-space.com.cn/priority-of-task/')
 
 
 # ==========快捷键设置==========

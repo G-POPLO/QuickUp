@@ -56,7 +56,7 @@ def initial_tasks_view(_taskView, _root):
         progress_colors['success'] = '#0f7b0f'
         progress_colors['error'] = '#c42b1c'
     datas.tasks_name_initial()# 读取任务列表
-    tasknames = sort_with_priority(datas.tasks_name.copy())
+    tasknames = sort_by_list(datas.tasks_name.copy())
     for task in tasknames:
         add_task_view(task)
 
@@ -66,11 +66,11 @@ def refresh_tasks_view():
     __clear_all_tasks_ui()
     datas.__load_tasks_name()
     now_tasks = sorted(datas.tasks_name)
-    tasknames = sort_with_priority(now_tasks)
+    tasknames = sort_by_list(now_tasks)
     for task in tasknames:
         add_task_view(task)
 
-def sort_with_priority(tasks:list):
+def sort_by_list(tasks:list):
     # 按list.json顺序排序
     list_json_path = os.path.join(datas.workspace, 'list.json')
     if not os.path.exists(list_json_path):
@@ -252,7 +252,7 @@ def search_tasks(keyword:str, silence=False):
             show_dialog(d, '没有找到相关任务', f'未找到关于<{keyword}>的任务', "msg", themename)
     else:
         __clear_all_tasks_ui()
-        tasknames = sort_with_priority(tasknames.copy())
+        tasknames = sort_by_list(tasknames.copy())
         for task in tasknames:
             add_task_view(task)
 

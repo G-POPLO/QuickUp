@@ -57,6 +57,8 @@ def __load_tasks_name():
     tasks_name.clear()
     for f in os.listdir(workspace):
         if f.endswith(".json") and (not f.endswith("[x].json") or config.settings['general']['showHidden']):
+            if f == "list.json":
+                continue
             # task-name[x].json可以看作是QuickUp的彩蛋
             # 用户可以自己在文件名中末尾添加[x]来隐藏任务
             tasks_name.append(f[:-5])
